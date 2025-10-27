@@ -4,10 +4,7 @@
   <meta charset="UTF-8">
   <title>تسجيل المتقاعدين والأرامل في الرحلات 2025</title>
 
-  <!-- ✅ الخط العربي الأساسي -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <!-- ✅ مكتبات -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -24,9 +21,7 @@
       box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center;
       width: 100%; max-width: 400px;
     }
-    input, select, button, h2 {
-      font-family: 'Cairo', sans-serif;
-    }
+    input, select, button, h2 { font-family: 'Cairo', sans-serif; }
     input, select {
       width: 100%; padding: 14px 18px; margin-bottom: 18px;
       border-radius: 10px; border: 2px solid #e0e0e0;
@@ -53,7 +48,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // ✅ إعدادات Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBnbQtyrGMltRuC9jhgu4OA9vaTXX5PXW8",
       authDomain: "omratouggourt.firebaseapp.com",
@@ -63,13 +57,11 @@
       appId: "1:414370554511:web:c16fead011fa1e39e286fa",
       measurementId: "G-R5SER55HX5"
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
-    // ✅ رابط السكريبت في Google Apps Script
     const scriptURL = "https://script.google.com/macros/s/AKfycbxx2VsNZOkDnmAI_mh4ZJ8MMYkgbvWcCVF8qx4_9Ysf0c998TDRw15fw57LOi9ztlPwkA/exec";
 
-    // 🔹 التحقق من رقم الحساب
     window.validateNumber = input => {
       input.value = input.value.replace(/\D/g, '');
       if (input.value.length > 10) input.value = input.value.slice(0, 10);
@@ -88,6 +80,7 @@
       try {
         const q = query(collection(db, "retraite"), where("account", "==", normalized));
         const snapshot = await getDocs(q);
+
         Swal.close();
 
         if (snapshot.empty) {
@@ -103,18 +96,15 @@
         const data = snapshot.docs[0].data();
         Swal.fire({
           icon: "success",
-          title: "✅ الحساب موجود",
+          title: "✅ الحساب موجود في قاعدة البيانات",
           html: `<b>رقم الحساب:</b> ${data.account}<br><b>الاسم الكامل:</b> ${data.name}`,
           confirmButtonText: "متابعة التسجيل"
         }).then(() => showForm(account, data.name));
-
       } catch (err) {
-        console.error(err);
         Swal.fire("❌ خطأ", "فشل الاتصال بقاعدة البيانات", "error");
       }
     };
 
-    // 🔹 نموذج التسجيل
     window.showForm = function(account, name) {
       const container = document.getElementById("mainContainer");
       container.innerHTML = `
@@ -168,7 +158,7 @@
       }
     };
 
-    window.validatePhone = function(input) {
+    window.validatePhone = input => {
       let value = input.value.replace(/\D/g, "");
       if (value.length > 10) value = value.slice(0, 10);
       let formatted = "";
@@ -179,7 +169,6 @@
       input.value = formatted;
     };
 
-    // 🔹 إرسال البيانات إلى Google Sheet
     window.submitForm = async function() {
       const account = document.getElementById("accountField").value;
       const name = document.getElementById("nameField").value;
@@ -196,11 +185,20 @@
 
       Swal.fire({ title: 'جاري التسجيل...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      const params = new URLSearchParams({ action: "register", account, name, status, daaira, baladiya, trip, phone });
+      const params = new URLSearchParams();
+      params.append("action", "register");
+      params.append("account", account);
+      params.append("name", name);
+      params.append("status", status);
+      params.append("daaira", daaira);
+      params.append("baladiya", baladiya);
+      params.append("trip", trip);
+      params.append("phone", phone);
 
       try {
         const res = await fetch(scriptURL, { method: "POST", body: params });
         const data = await res.json();
+
         Swal.close();
 
         if (data.result === "success") {
@@ -223,26 +221,37 @@
             btn.insertAdjacentElement("afterend", homeBtn);
           });
         } else if (data.result === "exists") {
-          Swal.fire("⚠️ الحساب مسجل مسبقًا", "", "warning").then(() => location.reload());
+          const d = data.data;
+          Swal.fire({
+            title: "⚠️ الحساب مسجل مسبقًا",
+            html: `<b>رقم الحساب:</b> ${d.account}<br>
+                   <b>الاسم الكامل:</b> ${d.name}<br>
+                   <b>الصفة:</b> ${d.status}<br>
+                   <b>الدائرة:</b> ${d.daaira}<br>
+                   <b>البلدية:</b> ${d.baladiya}<br>
+                   <b>الرحلة:</b> ${d.trip}<br>
+                   <b>رقم الهاتف:</b> ${d.phone}`,
+            icon: "warning",
+            confirmButtonText: "رجوع"
+          }).then(() => location.reload());
         } else {
           Swal.fire("❌ خطأ", "تعذر تسجيل البيانات", "error");
         }
-
       } catch (err) {
-        console.error(err);
         Swal.fire("❌ خطأ", "فشل الاتصال بالخادم", "error");
       }
     };
 
-    // 🔹 إنشاء وصل PDF بالعربية
-    window.generatePDF = async function({ account, name, status, daaira, baladiya, trip, phone }) {
+    // ✅ توليد وصل PDF مع خط محلي
+    window.generatePDF = async ({ account, name, status, daaira, baladiya, trip, phone }) => {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
       try {
-        const fontUrl = "https://cdn.jsdelivr.net/gh/teyvat-fonts/amiri-font@main/Amiri-Regular.ttf";
-        const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
-        const fontBase64 = btoa(String.fromCharCode(...new Uint8Array(fontBytes)));
+        const fontUrl = "./fonts/Amiri-Regular.ttf";
+        const response = await fetch(fontUrl);
+        const buffer = await response.arrayBuffer();
+        const fontBase64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
 
         doc.addFileToVFS("Amiri-Regular.ttf", fontBase64);
         doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
@@ -265,15 +274,15 @@
 
         let y = 50;
         lines.forEach(line => {
-          const w = doc.getTextWidth(line);
-          doc.text(line, 200 - w, y);
+          const textWidth = doc.getTextWidth(line);
+          doc.text(line, 200 - textWidth, y);
           y += 10;
         });
 
         doc.save(`وصل_${name}.pdf`);
       } catch (err) {
+        Swal.fire("⚠️ خطأ", "تعذر تحميل الخط العربي", "warning");
         console.error(err);
-        Swal.fire("⚠️ خطأ", "فشل تحميل الخط العربي", "error");
       }
     };
   </script>
