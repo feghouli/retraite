@@ -4,46 +4,10 @@
   <meta charset="UTF-8">
   <title>تسجيل المتقاعدين والأرامل في الرحلات 2025</title>
 
+  <!-- ✅ إضافة خط Cairo من Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Cairo', sans-serif;
-      background: linear-gradient(135deg, #6a11cb, #2575fc);
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100vh; padding: 15px;
-    }
-    .container {
-      background: white; padding: 35px 25px; border-radius: 18px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center;
-      width: 100%; max-width: 400px;
-    }
-    input, select, button, h2 { font-family: 'Cairo', sans-serif; }
-    input, select {
-      width: 100%; padding: 14px 18px; margin-bottom: 18px;
-      border-radius: 10px; border: 2px solid #e0e0e0;
-      font-size: 15px; text-align: center;
-    }
-    button {
-      background: linear-gradient(45deg, #6a11cb, #2575fc);
-      color: white; border: none; padding: 14px 0;
-      border-radius: 10px; font-size: 15px; cursor: pointer;
-      font-weight: 600; width: 100%;
-    }
-    #phoneField { direction: ltr; text-align: center; }
-  </style>
-</head>
-
-<body>
-  <div class="container" id="mainContainer">
-    <h2>التحقق من رقم الحساب الجاري</h2>
-    <input type="text" id="account" placeholder="أدخل رقم الحساب الجاري" oninput="validateNumber(this)">
-    <button onclick="checkAccount()">تحقق من رقم الحساب</button>
-  </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -60,8 +24,10 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
     const scriptURL = "https://script.google.com/macros/s/AKfycbxx2VsNZOkDnmAI_mh4ZJ8MMYkgbvWcCVF8qx4_9Ysf0c998TDRw15fw57LOi9ztlPwkA/exec";
 
+    // ✅ التحقق من رقم الحساب
     window.validateNumber = input => {
       input.value = input.value.replace(/\D/g, '');
       if (input.value.length > 10) input.value = input.value.slice(0, 10);
@@ -77,6 +43,7 @@
       Swal.fire({ title: 'جاري التحقق...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
       const normalized = account.replace(/^0+/, "");
+
       try {
         const q = query(collection(db, "retraite"), where("account", "==", normalized));
         const snapshot = await getDocs(q);
@@ -100,22 +67,28 @@
           html: `<b>رقم الحساب:</b> ${data.account}<br><b>الاسم الكامل:</b> ${data.name}`,
           confirmButtonText: "متابعة التسجيل"
         }).then(() => showForm(account, data.name));
+
       } catch (err) {
+        console.error(err);
         Swal.fire("❌ خطأ", "فشل الاتصال بقاعدة البيانات", "error");
       }
     };
 
+    // 🧾 نموذج التسجيل
     window.showForm = function(account, name) {
       const container = document.getElementById("mainContainer");
       container.innerHTML = `
         <h2>استمارة تسجيل المتقاعدين والأرامل</h2>
+       
         <input type="text" id="accountField" value="${account}" readonly>
         <input type="text" id="nameField" value="${name}" readonly>
+
         <select id="statusField">
           <option value="">اختر الصفة</option>
           <option value="متقاعد(ة)">متقاعد(ة)</option>
           <option value="أرملة">أرملة</option>
         </select>
+
         <select id="daairaField" onchange="updateBaladiya()">
           <option value="">اختر دائرة الإقامة</option>
           <option value="توقرت">توقرت</option>
@@ -124,7 +97,11 @@
           <option value="الحجيرة">الحجيرة</option>
           <option value="الطيبات">الطيبات</option>
         </select>
-        <select id="baladiyaField"><option value="">اختر بلدية الإقامة</option></select>
+
+        <select id="baladiyaField">
+          <option value="">اختر بلدية الإقامة</option>
+        </select>
+
         <select id="tripField">
           <option value="">اختر الرحلة</option>
           <option value="مصر">مصر</option>
@@ -132,6 +109,7 @@
           <option value="سطيف">سطيف</option>
           <option value="تمنراست">تمنراست</option>
         </select>
+
         <input type="text" id="phoneField" placeholder="رقم الهاتف (10 أرقام)" oninput="validatePhone(this)">
         <button id="submitBtn" onclick="submitForm()">تسجيل</button>
       `;
@@ -158,7 +136,7 @@
       }
     };
 
-    window.validatePhone = input => {
+    window.validatePhone = function(input) {
       let value = input.value.replace(/\D/g, "");
       if (value.length > 10) value = value.slice(0, 10);
       let formatted = "";
@@ -169,6 +147,7 @@
       input.value = formatted;
     };
 
+    // 🚀 إرسال البيانات إلى Google Sheets
     window.submitForm = async function() {
       const account = document.getElementById("accountField").value;
       const name = document.getElementById("nameField").value;
@@ -202,89 +181,74 @@
         Swal.close();
 
         if (data.result === "success") {
-          Swal.fire({
-            icon: "success",
-            title: "✅ تم التسجيل بنجاح",
-            text: "يمكنك الآن تحميل وصل التسجيل",
-            confirmButtonText: "موافق"
-          }).then(() => {
-            document.querySelectorAll("input, select").forEach(el => el.disabled = true);
-            const btn = document.getElementById("submitBtn");
-            btn.innerHTML = "📄 تحميل وصل التسجيل";
-            btn.onclick = () => generatePDF({ account, name, status, daaira, baladiya, trip, phone });
-
-            const homeBtn = document.createElement("button");
-            homeBtn.textContent = "🏠 الصفحة الرئيسية";
-            homeBtn.style.cssText =
-              "margin-top:15px;padding:12px 24px;font-size:16px;background:#6a11cb;color:#fff;border:none;border-radius:10px;cursor:pointer;width:100%;";
-            homeBtn.onclick = () => location.reload();
-            btn.insertAdjacentElement("afterend", homeBtn);
-          });
-        } else if (data.result === "exists") {
+          Swal.fire("✅ تم التسجيل بنجاح", "", "success").then(() => location.reload());
+        } 
+        else if (data.result === "exists") {
           const d = data.data;
           Swal.fire({
             title: "⚠️ الحساب مسجل مسبقًا",
             html: `<b>رقم الحساب:</b> ${d.account}<br>
                    <b>الاسم الكامل:</b> ${d.name}<br>
                    <b>الصفة:</b> ${d.status}<br>
-                   <b>الدائرة:</b> ${d.daaira}<br>
-                   <b>البلدية:</b> ${d.baladiya}<br>
-                   <b>الرحلة:</b> ${d.trip}<br>
+                   <b>دائرة الإقامة:</b> ${d.daaira}<br>
+                   <b>بلدية الإقامة:</b> ${d.baladiya}<br>
+                   <b>الرحلة المختارة:</b> ${d.trip}<br>
                    <b>رقم الهاتف:</b> ${d.phone}`,
             icon: "warning",
-            confirmButtonText: "رجوع"
+            confirmButtonText: "رجوع إلى الصفحة الرئيسية"
           }).then(() => location.reload());
-        } else {
+        } 
+        else {
           Swal.fire("❌ خطأ", "تعذر تسجيل البيانات", "error");
         }
       } catch (err) {
+        console.error(err);
         Swal.fire("❌ خطأ", "فشل الاتصال بالخادم", "error");
       }
     };
-
-    // ✅ توليد وصل PDF مع خط محلي
-    window.generatePDF = async ({ account, name, status, daaira, baladiya, trip, phone }) => {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-
-      try {
-        const fontUrl = "./fonts/Amiri-Regular.ttf";
-        const response = await fetch(fontUrl);
-        const buffer = await response.arrayBuffer();
-        const fontBase64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-
-        doc.addFileToVFS("Amiri-Regular.ttf", fontBase64);
-        doc.addFont("Amiri-Regular.ttf", "Amiri", "normal");
-        doc.setFont("Amiri");
-
-        doc.setFontSize(18);
-        doc.text("وصل التسجيل", 105, 25, { align: "center" });
-
-        doc.setFontSize(14);
-        const lines = [
-          `رقم الحساب: ${account}`,
-          `الاسم الكامل: ${name}`,
-          `الصفة: ${status}`,
-          `الدائرة: ${daaira}`,
-          `البلدية: ${baladiya}`,
-          `الرحلة المختارة: ${trip}`,
-          `رقم الهاتف: ${phone}`,
-          `تاريخ التسجيل: ${new Date().toLocaleDateString("ar-DZ")}`
-        ];
-
-        let y = 50;
-        lines.forEach(line => {
-          const textWidth = doc.getTextWidth(line);
-          doc.text(line, 200 - textWidth, y);
-          y += 10;
-        });
-
-        doc.save(`وصل_${name}.pdf`);
-      } catch (err) {
-        Swal.fire("⚠️ خطأ", "تعذر تحميل الخط العربي", "warning");
-        console.error(err);
-      }
-    };
   </script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Cairo', sans-serif; /* ✅ الخط Cairo */
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; padding: 15px;
+    }
+    .container {
+      background: white; padding: 35px 25px; border-radius: 18px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center;
+      width: 100%; max-width: 400px;
+      font-family: 'Cairo', sans-serif;
+    }
+    input, select, button, h2 {
+      font-family: 'Cairo', sans-serif; /* ✅ الخط نفسه في كل العناصر */
+    }
+    input, select {
+      width: 100%; padding: 14px 18px; margin-bottom: 18px;
+      border-radius: 10px; border: 2px solid #e0e0e0;
+      font-size: 15px; text-align: center;
+    }
+    input:focus, select:focus { outline: none; border-color: #2575fc; }
+    button {
+      background: linear-gradient(45deg, #6a11cb, #2575fc);
+      color: white; border: none; padding: 14px 0;
+      border-radius: 10px; font-size: 15px; cursor: pointer;
+      font-weight: 600; width: 100%;
+    }
+    #phoneField {
+      direction: ltr;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container" id="mainContainer">
+    <h2>التحقق من رقم الحساب الجاري</h2>
+    <input type="text" id="account" placeholder="أدخل رقم الحساب الجاري" oninput="validateNumber(this)">
+    <button onclick="checkAccount()">تحقق من رقم الحساب</button>
+  </div>
 </body>
 </html>
