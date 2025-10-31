@@ -189,7 +189,7 @@
             cancelButtonText: "🔙 إغلاق"
           }).then(result => {
             if (result.isConfirmed) {
-              window.open(`https://feghouli.github.io/dawnload_recip_retraite/?empId=${account}`, "_blank");
+              window.location.href = `https://feghouli.github.io/dawnload_recip_retraite/?empId=${accountNumber}`;
             } else {
               location.reload();
             }
@@ -328,3 +328,4 @@
   </div>
 </body>
 </html>
+
