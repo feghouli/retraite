@@ -26,6 +26,7 @@
 
     const scriptURL = "https://script.google.com/macros/s/AKfycbxx2VsNZOkDnmAI_mh4ZJ8MMYkgbvWcCVF8qx4_9Ysf0c998TDRw15fw57LOi9ztlPwkA/exec";
 
+    // ✅ التحقق من رقم الحساب
     window.validateNumber = input => {
       input.value = input.value.replace(/\D/g, '');
       if (input.value.length > 10) input.value = input.value.slice(0, 10);
@@ -72,11 +73,12 @@
       }
     };
 
-    // ✅ نموذج التسجيل
+    // 🧾 نموذج التسجيل
     window.showForm = function(account, name) {
       const container = document.getElementById("mainContainer");
       container.innerHTML = `
         <h2>استمارة تسجيل المتقاعدين والأرامل</h2>
+
         <input type="text" id="accountField" value="${account}" readonly>
         <input type="text" id="nameField" value="${name}" readonly>
 
@@ -177,45 +179,44 @@
 
         Swal.close();
 
+        // ✅ حالة التسجيل الجديد مع زر تحميل الوصل
         if (data.result === "success") {
-          Swal.fire("✅ تم التسجيل بنجاح", "", "success").then(() => location.reload());
+          Swal.fire({
+            title: "✅ تم التسجيل بنجاح",
+            icon: "success",
+            showCancelButton: true,
+            confirmButtonText: "📄 تحميل وصل التسجيل",
+            cancelButtonText: "🔙 إغلاق"
+          }).then(result => {
+            if (result.isConfirmed) {
+              window.open(`https://feghouli.github.io/dawnload_recip_retraite/?empId=${account}`, "_blank");
+            } else {
+              location.reload();
+            }
+          });
         } 
+        // ⚠️ حالة مسجل مسبقًا
         else if (data.result === "exists") {
           const d = data.data;
           Swal.fire({
             title: "⚠️ الحساب مسجل مسبقًا",
-            html: `
-              <b>رقم الحساب:</b> ${d.account}<br>
-              <b>الاسم الكامل:</b> ${d.name}<br>
-              <b>الصفة:</b> ${d.status}<br>
-              <b>دائرة الإقامة:</b> ${d.daaira}<br>
-              <b>بلدية الإقامة:</b> ${d.baladiya}<br>
-              <b>الرحلة المختارة:</b> ${d.trip}<br>
-              <b>رقم الهاتف:</b> ${d.phone}<br><br>
-
-              <button id="downloadBtn" style="
-                background: linear-gradient(45deg, #6a11cb, #2575fc);
-                color: white; border: none; padding: 10px 22px;
-                border-radius: 8px; font-size: 15px; cursor: pointer;
-                font-weight: 600; margin: 5px;">📥 تحميل الوصل</button>
-
-              <button id="closeBtn" style="
-                background: #aaa; color: white; border: none; padding: 10px 22px;
-                border-radius: 8px; font-size: 15px; cursor: pointer;
-                font-weight: 600; margin: 5px;">❌ إغلاق</button>
-            `,
+            html: `<b>رقم الحساب:</b> ${d.account}<br>
+                   <b>الاسم الكامل:</b> ${d.name}<br>
+                   <b>الصفة:</b> ${d.status}<br>
+                   <b>دائرة الإقامة:</b> ${d.daaira}<br>
+                   <b>بلدية الإقامة:</b> ${d.baladiya}<br>
+                   <b>الرحلة المختارة:</b> ${d.trip}<br>
+                   <b>رقم الهاتف:</b> ${d.phone}`,
             icon: "warning",
-            showConfirmButton: false,
-            width: 500
-          });
-
-          document.getElementById("downloadBtn").addEventListener("click", () => {
-            const url = `https://feghouli.github.io/dawnload_recip_retraite/?empId=${d.account}`;
-            window.open(url, "_blank");
-          });
-
-          document.getElementById("closeBtn").addEventListener("click", () => {
-            location.reload();
+            showCancelButton: true,
+            confirmButtonText: "📄 تحميل وصل التسجيل",
+            cancelButtonText: "🔙 إغلاق"
+          }).then(result => {
+            if (result.isConfirmed) {
+              window.open(`https://feghouli.github.io/dawnload_recip_retraite/?empId=${d.account}`, "_blank");
+            } else {
+              location.reload();
+            }
           });
         } 
         else {
@@ -257,21 +258,54 @@
       border-radius: 10px; font-size: 15px; cursor: pointer;
       font-weight: 600; width: 100%;
     }
-    #phoneField { direction: ltr; text-align: center; }
-    .page-header { text-align: center; margin-bottom: 25px; }
-    .header-logo { width: 160px; height: auto; display: block; margin: 0 auto 15px auto; filter: contrast(1.05) brightness(1.1); animation: pulseLogo 2.5s ease-in-out infinite; }
-    @keyframes pulseLogo { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-    .header-text { font-size: 15px; font-weight: 600; color: #000; line-height: 1.7; }
+    #phoneField {
+      direction: ltr;
+      text-align: center;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 25px;
+      font-family: "Cairo", sans-serif;
+    }
+
+    .page-header .header-logo {
+      width: 160px;
+      height: auto;
+      display: block;
+      margin: 0 auto 15px auto;
+      filter: contrast(1.05) brightness(1.1);
+      animation: pulseLogo 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulseLogo {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
     .gradient-title {
-      font-size: 24px; font-weight: 600;
+      font-family: "Cairo", sans-serif;
+      font-size: 24px;
+      font-weight: 600;
       background: linear-gradient(to right, #6a11cb, #2575fc);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      text-align: center; position: relative; margin-top: 20px; margin-bottom: 15px;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+      position: relative;
+      margin-top: 20px;
+      margin-bottom: 15px;
       display: inline-block;
     }
+
     .gradient-title::after {
-      content: ""; position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px;
-      background: linear-gradient(to right, #6a11cb, #2575fc); border-radius: 2px;
+      content: "";
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      border-radius: 2px;
     }
   </style>
 </head>
