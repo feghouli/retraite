@@ -4,10 +4,9 @@
   <meta charset="UTF-8">
   <title>تسجيل المتقاعدين والأرامل في الرحلات 2025</title>
 
-  <!-- ✅ إضافة خط Cairo من Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
@@ -27,7 +26,6 @@
 
     const scriptURL = "https://script.google.com/macros/s/AKfycbxx2VsNZOkDnmAI_mh4ZJ8MMYkgbvWcCVF8qx4_9Ysf0c998TDRw15fw57LOi9ztlPwkA/exec";
 
-    // ✅ التحقق من رقم الحساب
     window.validateNumber = input => {
       input.value = input.value.replace(/\D/g, '');
       if (input.value.length > 10) input.value = input.value.slice(0, 10);
@@ -74,12 +72,11 @@
       }
     };
 
-    // 🧾 نموذج التسجيل
+    // ✅ نموذج التسجيل
     window.showForm = function(account, name) {
       const container = document.getElementById("mainContainer");
       container.innerHTML = `
         <h2>استمارة تسجيل المتقاعدين والأرامل</h2>
-       
         <input type="text" id="accountField" value="${account}" readonly>
         <input type="text" id="nameField" value="${name}" readonly>
 
@@ -187,16 +184,39 @@
           const d = data.data;
           Swal.fire({
             title: "⚠️ الحساب مسجل مسبقًا",
-            html: `<b>رقم الحساب:</b> ${d.account}<br>
-                   <b>الاسم الكامل:</b> ${d.name}<br>
-                   <b>الصفة:</b> ${d.status}<br>
-                   <b>دائرة الإقامة:</b> ${d.daaira}<br>
-                   <b>بلدية الإقامة:</b> ${d.baladiya}<br>
-                   <b>الرحلة المختارة:</b> ${d.trip}<br>
-                   <b>رقم الهاتف:</b> ${d.phone}`,
+            html: `
+              <b>رقم الحساب:</b> ${d.account}<br>
+              <b>الاسم الكامل:</b> ${d.name}<br>
+              <b>الصفة:</b> ${d.status}<br>
+              <b>دائرة الإقامة:</b> ${d.daaira}<br>
+              <b>بلدية الإقامة:</b> ${d.baladiya}<br>
+              <b>الرحلة المختارة:</b> ${d.trip}<br>
+              <b>رقم الهاتف:</b> ${d.phone}<br><br>
+
+              <button id="downloadBtn" style="
+                background: linear-gradient(45deg, #6a11cb, #2575fc);
+                color: white; border: none; padding: 10px 22px;
+                border-radius: 8px; font-size: 15px; cursor: pointer;
+                font-weight: 600; margin: 5px;">📥 تحميل الوصل</button>
+
+              <button id="closeBtn" style="
+                background: #aaa; color: white; border: none; padding: 10px 22px;
+                border-radius: 8px; font-size: 15px; cursor: pointer;
+                font-weight: 600; margin: 5px;">❌ إغلاق</button>
+            `,
             icon: "warning",
-            confirmButtonText: "رجوع إلى الصفحة الرئيسية"
-          }).then(() => location.reload());
+            showConfirmButton: false,
+            width: 500
+          });
+
+          document.getElementById("downloadBtn").addEventListener("click", () => {
+            const url = `https://feghouli.github.io/dawnload_recip_retraite/?empId=${d.account}`;
+            window.open(url, "_blank");
+          });
+
+          document.getElementById("closeBtn").addEventListener("click", () => {
+            location.reload();
+          });
         } 
         else {
           Swal.fire("❌ خطأ", "تعذر تسجيل البيانات", "error");
@@ -211,7 +231,7 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Cairo', sans-serif; /* ✅ الخط Cairo */
+      font-family: 'Cairo', sans-serif;
       background: linear-gradient(135deg, #6a11cb, #2575fc);
       display: flex; justify-content: center; align-items: center;
       min-height: 100vh; padding: 15px;
@@ -219,11 +239,11 @@
     .container {
       background: white; padding: 35px 25px; border-radius: 18px;
       box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center;
-      width: 100%; max-width: 400px;
+      width: 100%; max-width: 500px;
       font-family: 'Cairo', sans-serif;
     }
     input, select, button, h2 {
-      font-family: 'Cairo', sans-serif; /* ✅ الخط نفسه في كل العناصر */
+      font-family: 'Cairo', sans-serif;
     }
     input, select {
       width: 100%; padding: 14px 18px; margin-bottom: 18px;
@@ -237,16 +257,38 @@
       border-radius: 10px; font-size: 15px; cursor: pointer;
       font-weight: 600; width: 100%;
     }
-    #phoneField {
-      direction: ltr;
-      text-align: center;
+    #phoneField { direction: ltr; text-align: center; }
+    .page-header { text-align: center; margin-bottom: 25px; }
+    .header-logo { width: 160px; height: auto; display: block; margin: 0 auto 15px auto; filter: contrast(1.05) brightness(1.1); animation: pulseLogo 2.5s ease-in-out infinite; }
+    @keyframes pulseLogo { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+    .header-text { font-size: 15px; font-weight: 600; color: #000; line-height: 1.7; }
+    .gradient-title {
+      font-size: 24px; font-weight: 600;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      text-align: center; position: relative; margin-top: 20px; margin-bottom: 15px;
+      display: inline-block;
+    }
+    .gradient-title::after {
+      content: ""; position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px;
+      background: linear-gradient(to right, #6a11cb, #2575fc); border-radius: 2px;
     }
   </style>
 </head>
 
 <body>
   <div class="container" id="mainContainer">
-    <h2>التحقق من رقم الحساب الجاري</h2>
+    <div class="page-header">
+      <img src="https://lh3.googleusercontent.com/d/1AOSzlvuRb-fAO0bqvo412HcHTfpRAX15" alt="شعار اللجنة" class="header-logo">
+      <div class="header-text">
+        الجمهورية الجزائرية الديمقراطية الشعبية<br>
+        وزارة التربية الوطنية<br>
+        اللجنة الوطنية للخدمات الاجتماعية لعمال التربية<br>
+        اللجنة الولائية للخدمات الاجتماعية لعمال التربية لولاية توقرت
+      </div>
+    </div>
+
+    <h2 class="gradient-title">بوابة تسجيل المتقاعدين و الأرامل في الرحلات</h2>
     <input type="text" id="account" placeholder="أدخل رقم الحساب الجاري" oninput="validateNumber(this)">
     <button onclick="checkAccount()">تحقق من رقم الحساب</button>
   </div>
