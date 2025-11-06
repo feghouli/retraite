@@ -274,6 +274,62 @@
 
   body {
     padding: 10px;
+  }
+} /* ✅ ← إغلاق القوس هنا */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Cairo', sans-serif;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; padding: 15px;
+}
+.name-input::placeholder { color: black; opacity: 1; }
+.container {
+  background: white; padding: 35px 25px; border-radius: 18px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center;
+  width: 100%; max-width: 500px;
+}
+input, select, button, h2 { font-family: 'Cairo', sans-serif; }
+input, select {
+  width: 100%; padding: 14px 18px; margin-bottom: 18px;
+  border-radius: 10px; border: 2px solid #e0e0e0;
+  font-size: 15px; text-align: center;
+}
+input:focus, select:focus { outline: none; border-color: #2575fc; }
+button {
+  background: linear-gradient(45deg, #6a11cb, #2575fc);
+  color: white; border: none; padding: 14px 0;
+  border-radius: 10px; font-size: 15px; cursor: pointer;
+  font-weight: 600; width: 100%;
+}
+#phone { direction: ltr; text-align: center; }
+.page-header { text-align: center; margin-bottom: 25px; }
+.header-logo {
+  width: 160px; height: auto; margin: 0 auto 15px auto;
+  display: block; filter: contrast(1.05) brightness(1.1);
+  animation: pulseLogo 2.5s ease-in-out infinite;
+}
+@keyframes pulseLogo {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+.header-text { font-size: 15px; font-weight: 600; color: #000; line-height: 1.7; }
+.gradient-title {
+  font-size: 24px; font-weight: 600;
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-top: 20px; margin-bottom: 15px;
+  display: inline-block; position: relative;
+}
+.gradient-title::after {
+  content: ""; position: absolute; bottom: -5px; left: 0;
+  width: 100%; height: 2px;
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+  border-radius: 2px;
+}
+
  
 
     
@@ -350,4 +406,5 @@
   </div>
 </body>
 </html>
+
 
